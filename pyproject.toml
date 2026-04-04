@@ -1,0 +1,21 @@
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[project]
+name = "bub-face"
+version = "0.1.0"
+description = "A web-based robo eyes demo controlled by aiohttp."
+requires-python = ">=3.12"
+dependencies = [
+    "aiohttp>=3.10",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "bub>=0.3.3",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

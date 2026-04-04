@@ -1,0 +1,230 @@
+:root {
+  color-scheme: dark;
+  --bg: radial-gradient(circle at top, #15273d 0%, #05070c 72%);
+  --accent: #53f2c7;
+  --spark: #c7fff2;
+  --eye-width: min(18vw, 180px);
+  --eye-height: min(15vw, 150px);
+  --eye-offset-x: 0px;
+  --eye-offset-y: 0px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #02040a;
+}
+
+body {
+  font-family: "Space Grotesk", "Avenir Next", sans-serif;
+}
+
+.stage {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(114, 132, 255, 0.06), transparent 36%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 18%),
+    var(--bg);
+}
+
+.stage.is-clock {
+  background:
+    radial-gradient(circle at 50% 35%, rgba(114, 132, 255, 0.04), transparent 36%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 18%),
+    #040812;
+}
+
+.stage::before,
+.stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.stage::before {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.04), transparent 18%),
+    radial-gradient(circle at 80% 24%, rgba(255, 255, 255, 0.05), transparent 16%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 24%);
+  mix-blend-mode: screen;
+}
+
+.stage::after {
+  background:
+    linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.02) 48%, transparent 100%),
+    linear-gradient(0deg, transparent 0%, rgba(255, 255, 255, 0.015) 48%, transparent 100%);
+  background-size: 100% 100%, 100% 100%;
+  opacity: 0.35;
+}
+
+.ambient {
+  position: absolute;
+  inset: auto;
+  width: 42vw;
+  height: 42vw;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  filter: blur(100px);
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.ambient-left {
+  left: -12vw;
+  top: 10vh;
+}
+
+.ambient-right {
+  right: -10vw;
+  bottom: 4vh;
+}
+
+.grid-glow {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 96px 96px;
+  mask-image: radial-gradient(circle at center, black 28%, transparent 78%);
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.eyes {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  grid-template-columns: repeat(2, var(--eye-width));
+  gap: clamp(42px, 9vw, 140px);
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.eye {
+  position: relative;
+  width: var(--eye-width);
+  height: var(--eye-height);
+  transform: translate(var(--eye-offset-x), var(--eye-offset-y));
+  transition: transform 180ms ease;
+}
+
+.eye-core {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, white 8%, var(--accent)) 0%, var(--accent) 55%, color-mix(in srgb, black 5%, var(--accent)) 100%);
+  clip-path: polygon(8% 0%, 92% 0%, 100% 12%, 100% 88%, 92% 100%, 8% 100%, 0% 88%, 0% 12%);
+  border-radius: 26px;
+  box-shadow:
+    0 0 18px color-mix(in srgb, var(--accent) 85%, transparent),
+    0 0 36px color-mix(in srgb, var(--accent) 72%, transparent),
+    0 0 72px color-mix(in srgb, var(--accent) 52%, transparent),
+    0 0 120px color-mix(in srgb, var(--accent) 34%, transparent);
+  transition:
+    clip-path 200ms ease,
+    border-radius 200ms ease,
+    transform 180ms ease,
+    box-shadow 200ms ease,
+    opacity 180ms ease;
+}
+
+.eye-core::before,
+.eye-core::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.eye-core::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 28%);
+  mix-blend-mode: screen;
+}
+
+.eye-core::after {
+  inset: -18%;
+  background: radial-gradient(circle at center, color-mix(in srgb, var(--accent) 64%, white) 0%, transparent 58%);
+  opacity: 0.32;
+  filter: blur(16px);
+}
+
+.clock-panel {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 12px;
+  text-align: center;
+  opacity: 0;
+  transform: scale(0.96);
+  pointer-events: none;
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.clock-time,
+.clock-date,
+.clock-lunar {
+  margin: 0;
+}
+
+.clock-time {
+  font-size: clamp(72px, 12vw, 176px);
+  line-height: 0.92;
+  letter-spacing: 0.06em;
+  color: color-mix(in srgb, var(--accent) 88%, white);
+  text-shadow:
+    0 0 20px color-mix(in srgb, var(--accent) 86%, transparent),
+    0 0 52px color-mix(in srgb, var(--accent) 46%, transparent);
+}
+
+.clock-date {
+  font-size: clamp(18px, 2vw, 28px);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(225, 242, 255, 0.74);
+}
+
+.clock-lunar {
+  font-size: clamp(14px, 1.5vw, 22px);
+  letter-spacing: 0.18em;
+  color: rgba(185, 231, 220, 0.76);
+}
+
+.stage.is-clock .clock-panel {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.stage.is-clock .eyes {
+  opacity: 0;
+  transform: scale(0.94);
+}
+
+@media (max-width: 960px) {
+  :root {
+    --eye-width: min(24vw, 140px);
+    --eye-height: min(20vw, 110px);
+  }
+
+  .eyes {
+    gap: clamp(22px, 7vw, 56px);
+  }
+
+  .ambient {
+    width: 58vw;
+    height: 58vw;
+  }
+}

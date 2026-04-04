@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Robo Eyes</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main id="stage" class="stage" aria-label="Robo eyes stage">
+      <div class="ambient ambient-left"></div>
+      <div class="ambient ambient-right"></div>
+      <div class="grid-glow"></div>
+      <section id="clockPanel" class="clock-panel" aria-live="polite">
+        <p id="clockTime" class="clock-time">00:00</p>
+        <p id="clockDate" class="clock-date">2000-01-01</p>
+        <p id="clockLunar" class="clock-lunar">农历正月初一</p>
+      </section>
+      <div class="eyes" id="eyes">
+        <div class="eye" data-eye="left">
+          <div class="eye-core"></div>
+        </div>
+        <div class="eye" data-eye="right">
+          <div class="eye-core"></div>
+        </div>
+      </div>
+    </main>
+
+    <script src="/static/app.js" type="module"></script>
+  </body>
+</html>
