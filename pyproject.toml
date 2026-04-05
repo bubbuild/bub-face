@@ -1,6 +1,6 @@
 [build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "bub-face"
@@ -11,6 +11,9 @@ dependencies = [
     "aiohttp>=3.10",
 ]
 
+[project.entry-points.bub]
+face = "bub_face.plugin"
+
 [dependency-groups]
 dev = [
     "pytest>=8.0",
@@ -19,3 +22,10 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.hatch.build.targets.wheel]
+sources = ["src"]
+only-include = ["src/bub_face", "src/skills"]
+
+[tool.hatch.build.targets.sdist]
+only-include = ["src/", "tests/"]

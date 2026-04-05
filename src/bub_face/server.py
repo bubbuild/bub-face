@@ -7,7 +7,7 @@ from pathlib import Path
 from aiohttp import WSMsgType, web
 from aiohttp.typedefs import Handler
 
-from bub_face import StateController
+from src.bub_face import StateController
 
 ROOT = Path(__file__).resolve().parent
 STATIC_DIR = ROOT / "static"
@@ -189,3 +189,7 @@ def create_app() -> web.Application:
 
 def main() -> None:
     web.run_app(create_app(), host="127.0.0.1", port=PORT)
+
+
+async def run() -> None:
+    await web._run_app(create_app(), host="127.0.0.1", port=PORT)
