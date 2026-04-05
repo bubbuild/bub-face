@@ -193,3 +193,7 @@ def main() -> None:
 
 async def run() -> None:
     await web._run_app(create_app(), host="127.0.0.1", port=PORT)
+
+
+if __name__ == "__main__":
+    main()

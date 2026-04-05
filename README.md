@@ -1,25 +1,33 @@
-# Web Robo Eyes
+# bub-face
 
-A web-based robo eyes demo with an `aiohttp` backend and multiple emotional presets.
+`bub-face` is a `bub` plugin that provides a web-based robot eyes UI backed by `aiohttp` and registers the `face` channel through the `bub` plugin entry point.
+
+## Installation
+
+Install this plugin into the same Python environment as `bub`.
+
+```bash
+uv pip install git+https://github.com/bubbuild/bub-face.git
+```
+
 
 ## Behavior
 
-- The screen shows the face by default.
-- After 10 minutes without activity, the UI switches to a full-screen date/time clock.
+- The screen shows the robot face by default.
+- After 10 minutes of inactivity, the UI switches to a full-screen date/time clock.
 - `POST /api/sleep` switches the UI to `clock` immediately.
 - Any `GET /api/state` request wakes the screen and switches it back to `face`.
-- Emotion changes, patches, resets, and WebSocket control messages also count as activity.
+- Emotion changes, state patches, resets, and WebSocket control messages also count as activity.
 
-## Run
+## Local Run
+
+If you want to debug the web UI provided by this plugin on its own, you can start the bundled server directly:
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -e ".[dev]"
 python -m bub_face.server
 ```
 
-Open `http://127.0.0.1:28282`.
+Then open `http://127.0.0.1:28282`.
 
 ## API
 
@@ -46,7 +54,7 @@ WebSocket clients can connect to `/ws` and send:
 {"action":"sleep"}
 ```
 
-`GET /api/state` and WebSocket `state` events now include:
+`GET /api/state` and WebSocket `state` events include:
 
 ```json
 {
