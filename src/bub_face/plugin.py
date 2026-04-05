@@ -13,7 +13,7 @@ class FaceChannel(Channel):
         self._ongoing_task: asyncio.Task[None] | None = None
 
     async def start(self, stop_event: asyncio.Event) -> None:
-        from src.bub_face.server import run
+        from bub_face.server import run
 
         logger.info("channel.face starting")
         self._ongoing_task = asyncio.create_task(run())

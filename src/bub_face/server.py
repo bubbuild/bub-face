@@ -7,7 +7,7 @@ from pathlib import Path
 from aiohttp import WSMsgType, web
 from aiohttp.typedefs import Handler
 
-from src.bub_face import StateController
+from bub_face import StateController
 
 ROOT = Path(__file__).resolve().parent
 STATIC_DIR = ROOT / "static"
