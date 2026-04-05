@@ -2,6 +2,12 @@
 
 `bub-face` is a `bub` plugin that provides a web-based robot eyes UI backed by `aiohttp` and registers the `face` channel through the `bub` plugin entry point.
 
+## Demo
+
+<video src="docs/assets/demo.mp4" controls muted playsinline width="960"></video>
+
+[Download the 10-second demo video](docs/assets/demo.mp4)
+
 ## Installation
 
 Install this plugin into the same Python environment as `bub`.

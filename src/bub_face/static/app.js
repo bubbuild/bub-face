@@ -5,6 +5,7 @@ const clockDate = document.getElementById("clockDate");
 const clockLunar = document.getElementById("clockLunar");
 const eyeElements = Array.from(document.querySelectorAll(".eye"));
 const eyeCores = eyeElements.map((eye) => eye.querySelector(".eye-core"));
+const CONTENT_SCALE = 1.5;
 
 const state = {
   data: null,
@@ -33,20 +34,21 @@ function applyState(nextState) {
   document.documentElement.style.setProperty("--bg", nextState.background);
   document.documentElement.style.setProperty("--accent", nextState.accent);
   document.documentElement.style.setProperty("--spark", nextState.spark);
+  document.documentElement.style.setProperty("--content-scale", String(CONTENT_SCALE));
   syncDisplayMode();
 
   const sizePreset = getEmotionPreset(nextState.emotion);
-  const eyeWidth = `${Math.round(sizePreset.width + (1 - nextState.pupil_size) * 38)}px`;
-  const eyeHeight = `${Math.round(sizePreset.height + nextState.openness * 24)}px`;
+  const eyeWidth = `${Math.round((sizePreset.width + (1 - nextState.pupil_size) * 38) * CONTENT_SCALE)}px`;
+  const eyeHeight = `${Math.round((sizePreset.height + nextState.openness * 24) * CONTENT_SCALE)}px`;
   const glowStrength = Math.round(42 + nextState.glow * 90);
 
-  document.documentElement.style.setProperty("--eye-width", `min(22vw, ${eyeWidth})`);
-  document.documentElement.style.setProperty("--eye-height", `min(18vw, ${eyeHeight})`);
+  document.documentElement.style.setProperty("--eye-width", `min(33vw, ${eyeWidth})`);
+  document.documentElement.style.setProperty("--eye-height", `min(27vw, ${eyeHeight})`);
 
   eyeElements.forEach((eye, index) => {
     const side = index === 0 ? -1 : 1;
-    const offsetX = Math.round(nextState.pupil_x * 26);
-    const offsetY = Math.round(nextState.pupil_y * 14);
+    const offsetX = Math.round(nextState.pupil_x * 26 * CONTENT_SCALE);
+    const offsetY = Math.round(nextState.pupil_y * 14 * CONTENT_SCALE);
 
     eye.style.setProperty("--eye-offset-x", `${offsetX}px`);
     eye.style.setProperty("--eye-offset-y", `${offsetY}px`);
