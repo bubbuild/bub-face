@@ -7,6 +7,8 @@ from loguru import logger
 
 
 class FaceChannel(Channel):
+    name = "face"
+
     def __init__(self) -> None:
         self._ongoing_task: asyncio.Task[None] | None = None
 
