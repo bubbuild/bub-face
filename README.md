@@ -8,6 +8,12 @@
 
 [Download the 10-second demo video](docs/assets/demo.mp4)
 
+## Demo Limitation
+
+This Web UI requires the display to stay active and visible. It is intended for demo and presentation use only, not for production scenarios where the screen may sleep, turn off, or run unattended.
+
+If you want a longer-running physical setup, use a dedicated low-power display device instead of a general-purpose monitor.
+
 ## Installation
 
 Install this plugin into the same Python environment as `bub`.
