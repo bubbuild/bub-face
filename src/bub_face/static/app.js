@@ -6,6 +6,8 @@ const clockLunar = document.getElementById("clockLunar");
 const eyeElements = Array.from(document.querySelectorAll(".eye"));
 const eyeCores = eyeElements.map((eye) => eye.querySelector(".eye-core"));
 const CONTENT_SCALE = 1.5;
+const RECONNECT_BASE_DELAY_MS = 1000;
+const RECONNECT_MAX_DELAY_MS = 10000;
 
 const state = {
   data: null,
@@ -13,14 +15,28 @@ const state = {
   blinkTimer: null,
   clockTimer: null,
   socket: null,
+  reconnectAttempts: 0,
+  reconnectTimer: null,
+  shouldReconnect: true,
 };
 
 async function boot() {
-  const response = await fetch("/api/state");
-  const payload = await response.json();
-
-  applySnapshot(payload);
+  await syncSnapshot();
   connectSocket();
+}
+
+async function syncSnapshot() {
+  try {
+    const response = await fetch("/api/state");
+    if (!response.ok) {
+      throw new Error(`Failed to load snapshot: ${response.status}`);
+    }
+
+    const payload = await response.json();
+    applySnapshot(payload);
+  } catch (error) {
+    console.warn("Failed to load initial snapshot.", error);
+  }
 }
 
 function applySnapshot(snapshot) {
@@ -128,14 +144,73 @@ function triggerBlink() {
 }
 
 function connectSocket() {
+  if (!state.shouldReconnect) {
+    return;
+  }
+
+  if (
+    state.socket !== null &&
+    (state.socket.readyState === WebSocket.OPEN ||
+      state.socket.readyState === WebSocket.CONNECTING)
+  ) {
+    return;
+  }
+
+  window.clearTimeout(state.reconnectTimer);
+  state.reconnectTimer = null;
+
   const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-  state.socket = new WebSocket(`${protocol}://${window.location.host}/ws`);
-  state.socket.addEventListener("message", (event) => {
+  const socket = new WebSocket(`${protocol}://${window.location.host}/ws`);
+  state.socket = socket;
+
+  socket.addEventListener("open", () => {
+    state.reconnectAttempts = 0;
+  });
+
+  socket.addEventListener("message", (event) => {
     const payload = JSON.parse(event.data);
     if (payload.type === "state") {
       applySnapshot(payload);
     }
   });
+
+  socket.addEventListener("close", () => {
+    if (state.socket === socket) {
+      state.socket = null;
+    }
+    scheduleReconnect();
+  });
+
+  socket.addEventListener("error", () => {
+    if (
+      socket.readyState === WebSocket.OPEN ||
+      socket.readyState === WebSocket.CONNECTING
+    ) {
+      socket.close();
+    }
+  });
+}
+
+function scheduleReconnect() {
+  if (!state.shouldReconnect || state.reconnectTimer !== null) {
+    return;
+  }
+
+  const delay = getReconnectDelay(state.reconnectAttempts);
+  state.reconnectAttempts += 1;
+  state.reconnectTimer = window.setTimeout(() => {
+    state.reconnectTimer = null;
+    connectSocket();
+  }, delay);
+}
+
+function getReconnectDelay(attempt) {
+  const cappedDelay = Math.min(
+    RECONNECT_BASE_DELAY_MS * 2 ** attempt,
+    RECONNECT_MAX_DELAY_MS
+  );
+  const jitter = 0.85 + Math.random() * 0.3;
+  return Math.round(cappedDelay * jitter);
 }
 
 function syncDisplayMode() {
@@ -386,6 +461,14 @@ function polygonFromPoints(points) {
 function clamp(value, minimum, maximum) {
   return Math.max(minimum, Math.min(value, maximum));
 }
+
+window.addEventListener("beforeunload", () => {
+  state.shouldReconnect = false;
+  window.clearTimeout(state.reconnectTimer);
+  if (state.socket !== null) {
+    state.socket.close(1000, "Page unload");
+  }
+});
 
 boot().catch((error) => {
   console.error(error);
