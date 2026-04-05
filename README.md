@@ -4,9 +4,7 @@
 
 ## Demo
 
-<video src="docs/assets/demo.mp4" controls muted playsinline width="960"></video>
-
-[Download the 10-second demo video](docs/assets/demo.mp4)
+https://github.com/user-attachments/assets/4e0baa87-4e93-4d39-8416-1a8db84af99f
 
 ## Installation
 
