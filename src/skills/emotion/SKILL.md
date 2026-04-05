@@ -1,6 +1,6 @@
 ---
 name: emotion
-description: Use this when you want to change the emotion of the robo eyes. You must decide the emotion at the start of every turn.
+description: Use this when you want to change the emotion of the robo eyes.
 ---
 
 # Bub Face Emotion Skill
