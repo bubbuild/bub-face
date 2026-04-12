@@ -174,6 +174,17 @@ class StateController:
         self._time_fn = time_fn or monotonic
         self._display_mode = DisplayMode.FACE
         self._last_active_at = self._time_fn()
+        self._listeners: list[Callable[[], None]] = []
+
+    def add_listener(self, callback: Callable[[], None]) -> None:
+        self._listeners.append(callback)
+
+    def remove_listener(self, callback: Callable[[], None]) -> None:
+        self._listeners.remove(callback)
+
+    def _notify(self) -> None:
+        for listener in self._listeners:
+            listener()
 
     @property
     def state(self) -> EyeState:
@@ -198,12 +209,14 @@ class StateController:
     def reset(self) -> EyeState:
         self.wake()
         self._state = self._preset(Emotion.NEUTRAL)
+        self._notify()
         return self._state
 
     def set_emotion(self, emotion: str | Emotion) -> EyeState:
         self.wake()
         parsed = emotion if isinstance(emotion, Emotion) else Emotion(emotion)
         self._state = self._preset(parsed)
+        self._notify()
         return self._state
 
     def patch(self, payload: dict[str, Any]) -> EyeState:
@@ -232,6 +245,7 @@ class StateController:
             )
 
         self._state = EyeState(**filtered)
+        self._notify()
         return self._state
 
     def list_emotions(self) -> list[str]:
@@ -248,6 +262,7 @@ class StateController:
         if self._display_mode is DisplayMode.CLOCK:
             return False
         self._display_mode = DisplayMode.CLOCK
+        self._notify()
         return True
 
     def maybe_sleep(self) -> bool:
@@ -259,3 +274,16 @@ class StateController:
 
     def _preset(self, emotion: Emotion) -> EyeState:
         return EyeState(emotion=emotion, **EMOTION_PRESETS[emotion])
+
+
+DEFAULT_IDLE_TIMEOUT_SECONDS = 600
+_shared_controller: StateController | None = None
+
+
+def shared_controller() -> StateController:
+    global _shared_controller
+    if _shared_controller is None:
+        _shared_controller = StateController(
+            idle_timeout_seconds=DEFAULT_IDLE_TIMEOUT_SECONDS
+        )
+    return _shared_controller

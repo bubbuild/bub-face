@@ -1,13 +1,12 @@
 import asyncio
 
-import aiohttp
 from bub import hookimpl
 from bub.channels import Channel
 from bub.envelope import field_of
 from bub.types import Envelope, MessageHandler, State
 from loguru import logger
 
-from bub_face.server import PORT
+from bub_face.state import Emotion, shared_controller
 
 
 class FaceChannel(Channel):
@@ -33,9 +32,12 @@ class FaceChannel(Channel):
             self._ongoing_task = None
 
 
-@hookimpl
+@hookimpl(tryfirst=True)
 def provide_channels(message_handler: MessageHandler) -> list[Channel]:
     _ = message_handler  # not used
+    from bub_face.terminal import patch_cli_channel
+
+    patch_cli_channel()
     return [FaceChannel()]
 
 
@@ -44,9 +46,5 @@ async def load_state(message: Envelope, session_id: str) -> State:
     _ = session_id  # not used
     channel = field_of(message, "channel")
     if channel == "xiaoai":
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                f"http://localhost:{PORT}/api/emotion", json={"emotion": "neutral"}
-            ):
-                pass
+        shared_controller().set_emotion(Emotion.NEUTRAL)
     return {}

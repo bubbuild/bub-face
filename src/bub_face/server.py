@@ -8,6 +8,7 @@ from aiohttp import WSMsgType, web
 from aiohttp.typedefs import Handler
 
 from bub_face import StateController
+from bub_face.state import shared_controller
 
 ROOT = Path(__file__).resolve().parent
 STATIC_DIR = ROOT / "static"
@@ -28,7 +29,6 @@ async def set_emotion(request: web.Request) -> web.Response:
     payload = await request.json()
     emotion = payload["emotion"]
     state = controller.set_emotion(emotion)
-    await broadcast_state(request.app, source="emotion")
     return web.json_response(
         {
             "state": state.to_dict(),
@@ -41,7 +41,6 @@ async def patch_state(request: web.Request) -> web.Response:
     controller: StateController = request.app["controller"]
     payload = await request.json()
     state = controller.patch(payload)
-    await broadcast_state(request.app, source="patch")
     return web.json_response(
         {
             "state": state.to_dict(),
@@ -53,7 +52,6 @@ async def patch_state(request: web.Request) -> web.Response:
 async def reset_state(request: web.Request) -> web.Response:
     controller: StateController = request.app["controller"]
     state = controller.reset()
-    await broadcast_state(request.app, source="reset")
     return web.json_response(
         {
             "state": state.to_dict(),
@@ -65,7 +63,6 @@ async def reset_state(request: web.Request) -> web.Response:
 async def sleep_state(request: web.Request) -> web.Response:
     controller: StateController = request.app["controller"]
     controller.sleep()
-    await broadcast_state(request.app, source="sleep")
     return web.json_response(controller.snapshot())
 
 
@@ -104,9 +101,6 @@ async def websocket_handler(request: web.Request) -> web.WebSocketResponse:
                 await ws.send_json(
                     {"type": "error", "message": f"Unsupported action: {action}"}
                 )
-                continue
-
-            await broadcast_state(request.app, source="ws")
     finally:
         sockets.discard(ws)
 
@@ -147,16 +141,26 @@ async def on_shutdown(app: web.Application) -> None:
 
 
 async def on_startup(app: web.Application) -> None:
+    def _on_state_change() -> None:
+        asyncio.ensure_future(broadcast_state(app, source="controller"))
+
+    controller: StateController = app["controller"]
+    controller.add_listener(_on_state_change)
+    app["_state_listener"] = _on_state_change
+
     async def idle_watchdog() -> None:
         while True:
             await asyncio.sleep(1)
-            if app["controller"].maybe_sleep():
-                await broadcast_state(app, source="idle_timeout")
+            controller.maybe_sleep()
 
     app["idle_watchdog_task"] = asyncio.create_task(idle_watchdog())
 
 
 async def on_cleanup(app: web.Application) -> None:
+    listener = app.pop("_state_listener", None)
+    if listener is not None:
+        app["controller"].remove_listener(listener)
+
     task: asyncio.Task[None] | None = app.get("idle_watchdog_task")
     if task is None:
         return
@@ -169,7 +173,7 @@ async def on_cleanup(app: web.Application) -> None:
 
 def create_app() -> web.Application:
     app = web.Application(middlewares=[error_middleware])
-    app["controller"] = StateController(idle_timeout_seconds=600)
+    app["controller"] = shared_controller()
     app["sockets"] = set()
 
     app.router.add_get("/", index)
