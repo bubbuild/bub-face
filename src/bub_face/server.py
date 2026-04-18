@@ -169,7 +169,7 @@ async def on_cleanup(app: web.Application) -> None:
 
 def create_app() -> web.Application:
     app = web.Application(middlewares=[error_middleware])
-    app["controller"] = StateController(idle_timeout_seconds=600)
+    app["controller"] = StateController(idle_timeout_seconds=300)
     app["sockets"] = set()
 
     app.router.add_get("/", index)

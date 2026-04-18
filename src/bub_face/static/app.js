@@ -270,7 +270,7 @@ function formatLunarDate(value) {
       month: "long",
       day: "numeric",
     }).format(value);
-    return `农历 ${lunarDate}`;
+    return lunarDate;
   } catch {
     return "";
   }
